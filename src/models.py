@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class User(db.Model):
-    __tablename__= user
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(120), unique=False, nullable=False)
     last_name = db.Column(db.String(120), unique=False, nullable=False)
@@ -12,7 +12,6 @@ class User(db.Model):
     favorite_people = db.relationship('FavoritePeople')
     favorite_planets = db.relationship('FavoritePlanet')
    
-
     def __repr__(self):
         return '<User %r>' % self.username
 
@@ -38,8 +37,6 @@ class User(db.Model):
             "favorite_planets": favorite_planets
         }
 
-    
-
     def save(self):
         db.session.add(self)
         db.session.commit()
@@ -52,9 +49,8 @@ class User(db.Model):
         db.session.commit()
 
 
-
 class People(db.Model):
-    __tablename__ = people
+    __tablename__ = 'people'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=False, nullable=False)
     height = db.Column(db.Integer, unique=False)
@@ -75,8 +71,9 @@ class People(db.Model):
             "eye_color": self.eye_color,    
         }
 
+
 class Planet(db.Model):
-    __tablename__ = planet
+    __tablename__ = 'planet'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=False, nullable=False)
     rotation_period = db.Column(db.Integer)
@@ -95,27 +92,38 @@ class Planet(db.Model):
             "diameter": self.diameter,
         }
 
+
 class FavoritePeople(db.Model):
-    __tablename__= favoritepeople
-    users_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    __tablename__= 'favoritepeople'
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
     people_id = db.Column(db.Integer, db.ForeignKey('people.id'), primary_key=True)
     people_rel = db.relationship('People')
     
-
     def __repr__(self):
         return '<FavoritePeople %r>' % self.favoritepeople
 
     def serialize(self):
         return {
-            "users_id": self.users_id,
-            "people_id": self.people_id,
-    
+            "user_id": self.user_id,
+            "people_id": self.people_id, 
         }
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
 
 class FavoritePlanet(db.Model):
-    __tablename__= favoriteplanet
-    users_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    planets_id = db.Column(db.Integer, db.ForeignKey('planets.id'), primary_key=True)
+    __tablename__= 'favoriteplanet'
+    users_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    planet_id = db.Column(db.Integer, db.ForeignKey('planet.id'), primary_key=True)
     planet_rel = db.relationship('Planet')
 
     def __repr__(self):
@@ -124,6 +132,17 @@ class FavoritePlanet(db.Model):
     def serialize(self):
         return {
             "users_id": self.users_id,
-            "planets_id": self.planets_id,
-    
+            "planet_id": self.planet_id,   
         }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+

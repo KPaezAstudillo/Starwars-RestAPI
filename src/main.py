@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, People, Planet, FavoriteCharacter, FavoritePlanet
+from models import db, User, People, Planet, FavoritePeople, FavoritePlanet
 #from models import Person
 
 app = Flask(__name__)
@@ -30,6 +30,8 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+
+#GET ENDPOINTS
 @app.route("/people", methods=["GET"])
 def get_characters():
     people =People.query.all()
@@ -53,7 +55,7 @@ def get_planet_by_id(planet_id):
     return jsonify(planet.serialize()), 200
 
 @app.route("/users", methods=["GET"])
-def get_planets():
+def get_users():
     users =User.query.all()
     users = list(map(lambda user: user.serialize(), users))
     return jsonify(users), 200
@@ -63,6 +65,54 @@ def get_favorites():
      favorites = User.query.all()
      favorites= list(map(lambda favorite: favorite.serialize_with_favorites(), favorites))
      return jsonify(favorites), 200
+
+
+#POST AND DELETE ENDPOINTS
+@app.route('/favorite/planet/<int:planet_id>', methods=['POST', 'DELETE'])    
+def add_delete_favorite_planet(planet_id):
+    if request.method == 'POST':
+        users_id = 1
+
+        favoriteplanet = FavoritePlanet()
+        favoriteplanet.users_id = users_id
+        favoriteplanet.planet_id = planet_id
+
+        favoriteplanet.save()
+
+        return jsonify(favoriteplanet.serialize()), 200
+    
+    if request.method == 'DELETE':
+        favoriteplanet = FavoritePlanet.query.filter_by(users_id=1,planet_id=planet_id).first()
+
+        favoriteplanet.delete()
+
+    return jsonify({"msg":"deleted"}), 200
+
+@app.route('/favorite/people/<int:people_id>', methods=['POST', 'DELETE'])    
+def add_delete_favorite_people(people_id):
+    if request.method == 'POST':
+        user_id = 1
+
+        favoritepeople = FavoritePeople()
+        favoritepeople.user_id = user_id
+        favoritepeople.people_id = people_id
+
+        favoritepeople.save()
+
+        return jsonify(favoritepeople.serialize()), 200 
+
+    if request.method == 'DELETE':
+        favoritepeople = FavoritePeople.query.filter_by(user_id=1,people_id=people_id).first()
+
+        favoritepeople.delete()
+
+    return jsonify({"msg":"deleted"}), 200
+
+
+
+
+
+
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
